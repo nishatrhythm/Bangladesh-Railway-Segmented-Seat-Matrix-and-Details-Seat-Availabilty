@@ -10,6 +10,12 @@ This project provides a solution to visualize and analyze train fare matrices fo
 - **Detailed Fare Breakdown**: Shows base fare and VAT amounts for direct and segmented routes.
 - **Interactive User Interface**: Menu-driven prompts for ease of use.
 
+## Sample Run
+
+Below is an example of the script running in the terminal:
+
+![Script running in terminal](https://github.com/nishatrhythm/Bangladesh-Railway-Segmented-Fare-Matrix/blob/main/images/Screenshot_1.png)
+
 ## Installation
 
 1. **Clone the repository**:
