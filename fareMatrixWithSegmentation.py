@@ -5,16 +5,17 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from tabulate import tabulate
 from colorama import init, Fore, Style
 from datetime import datetime
+from collections import deque
 
 # Initialize colorama for colored text output
 init(autoreset=True)
 
 # Directory containing processed JSON files
 processed_dir = 'processed'
-target_train_model = "707"  # This can be set to match the desired train model
+target_train_model = "781"  # This can be set to match the desired train model
 
 # Date for the journey in the correct format
-date_of_journey = "19-Nov-2024"  # This can be modified as needed
+date_of_journey = "15-Nov-2024"  # This can be modified as needed
 
 # Collect train data from the processed folder
 train_data = None
@@ -61,31 +62,32 @@ def get_seat_availability(from_city, to_city):
         "date_of_journey": date_of_journey,
         "seat_class": "SHULOV"  # Modify this as needed
     }
-    
+
     response = requests.get(url, params=params)
-    
+
     if response.status_code == 200:
         response_data = response.json()
         trains = response_data.get("data", {}).get("trains", [])
-        
+
         for train in trains:
             if train.get("train_model") == target_train_model:
-                seat_info = {seat_type: {"online": 0, "offline": 0, "fare": 0} for seat_type in seat_types}
+                seat_info = {seat_type: {"online": 0, "offline": 0, "fare": 0, "vat_amount": 0} for seat_type in seat_types}
                 for seat in train.get("seat_types", []):
                     seat_type = seat["type"]
                     if seat_type in seat_info:
                         seat_info[seat_type] = {
                             "online": seat["seat_counts"]["online"],
                             "offline": seat["seat_counts"]["offline"],
-                            "fare": seat["fare"]
+                            "fare": float(seat["fare"]),
+                            "vat_amount": float(seat["vat_amount"])
                         }
                 print(f"{Fore.GREEN}Successfully fetched data for {from_city} to {to_city}")
                 return from_city, to_city, seat_info
-        
+
         # If the train is not found in the response, return empty data
         print(f"{Fore.YELLOW}No data found for {target_train_model} between {from_city} and {to_city}")
         return from_city, to_city, None
-    
+
     # If the response fails, log the error and return None
     print(f"{Fore.RED}Failed to fetch data for {from_city} to {to_city}. Status code: {response.status_code}")
     return from_city, to_city, None
@@ -115,14 +117,9 @@ with ThreadPoolExecutor(max_workers=10) as executor:
 # Function to display the table in chunks to fit the terminal window
 def print_table_in_chunks(table_data, header, chunk_size=12):
     for start in range(1, len(header), chunk_size):
-        # Define the end of the current chunk
         end = min(start + chunk_size, len(header))
-        
-        # Print the header and table data for the current chunk
         current_header = header[:1] + header[start:end]
         current_table_data = [row[:1] + row[start:end] for row in table_data]
-        
-        # Print the chunk using tabulate
         print(tabulate(current_table_data, headers=current_header, tablefmt="grid"))
 
 # Display the fare matrices in chunks to fit terminal width
@@ -136,10 +133,8 @@ for seat_type in seat_types:
         print(f"\n{'-'*50}")
         print(f"Fare Matrix Representation for Seat Type: {seat_type}")
         print(f"{'-'*50}")
-
         table_data = []
         header = ["From\\To"] + stations
-        
         for i, from_city in enumerate(stations):
             row = [from_city]
             for j, to_city in enumerate(stations):
@@ -150,8 +145,98 @@ for seat_type in seat_types:
                     available_seats = seat_info["online"] + seat_info["offline"]
                     row.append(available_seats if available_seats > 0 else "")
             table_data.append(row)
-        
-        # Print the table in chunks
         print_table_in_chunks(table_data, header, chunk_size=12)
 
 print("\nOnly fare matrices with available seats have been displayed.")
+
+# User input for the journey with menu option
+def display_menu():
+    print("\nMenu Options:")
+    print("1. Check Availability")
+    print("2. Exit")
+
+def prompt_user():
+    while True:
+        display_menu()
+        choice = input("\nEnter your choice (1 or 2): ").strip()
+        if choice == '1':
+            origin = input("\nEnter the origin station: ").strip()
+            destination = input("Enter the destination station: ").strip()
+            return origin, destination
+        elif choice == '2':
+            return None, None
+        else:
+            print(f"{Fore.RED}Invalid choice. Please enter 1 or 2.")
+
+# Pathfinding algorithm to find the segmented routes
+def find_routes(origin, destination, seat_type):
+    queue = deque([(origin, [], 0)])
+    visited = set()
+
+    while queue:
+        current_station, path, total_fare = queue.popleft()
+
+        if current_station in visited:
+            continue
+        visited.add(current_station)
+
+        if current_station == destination:
+            return path, total_fare
+
+        for next_station in stations:
+            if next_station == current_station or stations.index(next_station) <= stations.index(current_station):
+                continue
+
+            seat_info = fare_matrices[seat_type][current_station].get(next_station)
+            if seat_info and seat_info["online"] > 0:
+                next_fare = float(seat_info["fare"])
+                vat_amount = float(seat_info.get("vat_amount", 0))
+                total_cost = next_fare + vat_amount
+                new_path = path + [(current_station, next_station, f"{next_fare} (Base) + {vat_amount} (VAT) = {total_cost}")]
+                queue.append((next_station, new_path, total_fare + total_cost))
+
+    return None
+
+# Main interactive loop
+while True:
+    origin, destination = prompt_user()
+    if origin is None or destination is None:
+        print(f"\n{Fore.CYAN}Exiting the program. Thank you!")
+        break
+
+    # Display segmented routes only for seat types that have available seats
+    for seat_type in seat_types:
+        # Check if there is any segment in the fare matrix with available seats for the seat type
+        has_available_seats = any(
+            (fare_info["online"] + fare_info["offline"]) > 0
+            for from_station in stations
+            for to_station, fare_info in fare_matrices[seat_type][from_station].items()
+            if from_station != to_station and stations.index(from_station) < stations.index(to_station)
+        )
+
+        if not has_available_seats:
+            continue  # Skip seat types with no available seats
+
+        # Check if the direct route is available
+        direct_route_info = fare_matrices[seat_type][origin].get(destination)
+        if direct_route_info and direct_route_info.get("online", 0) > 0:
+            fare = float(direct_route_info["fare"])
+            vat_amount = float(direct_route_info.get("vat_amount", 0))
+            total_cost = fare + vat_amount
+
+            print(f"\n{Fore.CYAN}Finding segmented route for seat type: {seat_type}")
+            print(f"\n{Fore.GREEN}Direct route available for seat type {seat_type} from {origin} to {destination}.")
+            print(f"Fare (Base): {fare} + VAT: {vat_amount} = Total Cost: {total_cost}")
+        else:
+            print(f"\n{Fore.CYAN}Finding segmented route for seat type: {seat_type}")
+            result = find_routes(origin, destination, seat_type)
+            if result:
+                route_segments, total_fare = result
+                print(f"{Fore.GREEN}Segmented route found for seat type {seat_type}:")
+                for seg in route_segments:
+                    print(f" - {seg[0]} to {seg[1]}, Fare + VAT: {seg[2]}")
+                print(f"Total Fare: {total_fare}")
+            else:
+                print(f"{Fore.YELLOW}No segmented route available for seat type {seat_type}.")
+
+    print(f"\n{Fore.CYAN}You can select an option from the menu again.")
