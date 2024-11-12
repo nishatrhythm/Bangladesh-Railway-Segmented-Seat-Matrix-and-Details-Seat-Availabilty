@@ -24,14 +24,16 @@ This project provides a solution to visualize and analyze train fare matrices fo
 
 ## Usage
 
-1. **Run the script:**
+1. **Modify the script:**
+   - You need to update the `target_train_model` and `date_of_journey` variables in the `fareMatrixWithSegmentation.py` script to match your desired train model and date.
+2. **Run the script:**
    ```bash
    python fareMatrixWithSegmentation.py
    ```
-2. **Menu Options:**
+3. **Menu Options:**
    - Select **1** to check seat availability and enter origin and destination stations.
    - Select **2** to exit the program.
-3. **Output Details:**
+4. **Output Details:**
    - Displays fare matrices for each seat type if seats are available.
    - Shows direct routes with a breakdown of base fare and VAT.
    - Finds and displays segmented routes if a direct route is not available.
