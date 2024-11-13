@@ -92,7 +92,7 @@ def get_seat_availability(from_city, to_city):
     print(f"{Fore.RED}Failed to fetch data for {from_city} to {to_city}. Status code: {response.status_code}")
     return from_city, to_city, None
 
-# Create a dictionary to store fare matrices for each seat type
+# Create a dictionary to store seat matrices for each seat type
 fare_matrices = {seat_type: {from_city: {} for from_city in stations} for seat_type in seat_types}
 
 # Use ThreadPoolExecutor for concurrent data fetching
@@ -122,7 +122,7 @@ def print_table_in_chunks(table_data, header, chunk_size=12):
         current_table_data = [row[:1] + row[start:end] for row in table_data]
         print(tabulate(current_table_data, headers=current_header, tablefmt="grid"))
 
-# Display the fare matrices in chunks to fit terminal width
+# Display the seat matrices in chunks to fit terminal width
 for seat_type in seat_types:
     has_seats = any(
         any((seat_info["online"] + seat_info["offline"]) > 0 for seat_info in fare_matrices[seat_type][from_city].values())
@@ -131,7 +131,7 @@ for seat_type in seat_types:
     
     if has_seats:
         print(f"\n{'-'*50}")
-        print(f"Fare Matrix Representation for Seat Type: {seat_type}")
+        print(f"Seat Matrix Representation for Seat Type: {seat_type}")
         print(f"{'-'*50}")
         table_data = []
         header = ["From\\To"] + stations
@@ -147,7 +147,7 @@ for seat_type in seat_types:
             table_data.append(row)
         print_table_in_chunks(table_data, header, chunk_size=12)
 
-print("\nOnly fare matrices with available seats have been displayed.")
+print("\nOnly seat matrices with available seats have been displayed.")
 
 # User input for the journey with menu option
 def display_menu():
@@ -206,7 +206,7 @@ while True:
 
     # Display segmented routes only for seat types that have available seats
     for seat_type in seat_types:
-        # Check if there is any segment in the fare matrix with available seats for the seat type
+        # Check if there is any segment in the seat matrix with available seats for the seat type
         has_available_seats = any(
             (fare_info["online"] + fare_info["offline"]) > 0
             for from_station in stations
