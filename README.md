@@ -89,52 +89,51 @@ pip install requests tabulate colorama
 
 ## Usage
 
-### Configure the Script
+1. **Configure the Script:**
 
-Update the following variables in the `detailsSeatAvailability.py` script:
-
-```python
-TOKEN = 'your_token_here'     # Replace with your authorization token
-from_city = "Dhaka"           # Set the origin city
-to_city = "Joydebpur"         # Set the destination city
-date_of_journey = "03-Dec-2024"  # Set the journey date
-```
-
-### Run the Script:
-```bash
-python detailsSeatAvailability.py
-```
-
-### Output Details
-
-- **Train Details**: Displays train name, departure, and arrival times for the selected route.
-- **Seat Availability**: Categorized by seat type, with seats grouped by prefixes for better organization.
-- **Color-Coded Table**: Indicates available seats and those in the booking process with visual distinctions for easy comprehension.
-
-### Example Output for a Route
+   Update the following variables in the `detailsSeatAvailability.py` script:
+    
+   ```python
+   TOKEN = 'your_token_here'     # Replace with your authorization token
+   from_city = "Dhaka"           # Set the origin city
+   to_city = "Joydebpur"         # Set the destination city
+   date_of_journey = "03-Dec-2024"  # Set the journey date
    ```
-TISTA EXPRESS (707) (03 Dec, 07:30 am - 03 Dec, 08:19 am) (Dhaka - Joydebpur)
-================================================================================
 
-Seat Type: SNIGDHA
-Available Tickets: 0 ticket | In Booking Process: 2 tickets
-+-------------------------------------+----------------+
-| Status                              | Seat Numbers   |
-+=====================================+================+
-| In Booking Process (JA) - 2 tickets | JA-4, JA-19    |
-+-------------------------------------+----------------+
+2. **Run the Script:**
+   ```bash
+   python detailsSeatAvailability.py
+   ```
 
-Seat Type: S_CHAIR
-Available Tickets: 19 tickets | In Booking Process: 2 tickets
-+--------------------------------------+-------------------------------------------------+
-| Status                               | Seat Numbers                                    |
-+======================================+=================================================+
-| Available (THA) - 19 tickets         | THA-4, THA-6, THA-10, THA-12, THA-14, THA-17,   |
-|                                      | THA-18, THA-20, THA-23, THA-31, THA-32, THA-30, |
-|                                      | THA-29, THA-34, THA-36, THA-35, THA-39, THA-40, |
-|                                      | THA-38                                          |
-+--------------------------------------+-------------------------------------------------+
-| In Booking Process (NEO) - 2 tickets | NEO-55, NEO-56                                  |
-+--------------------------------------+-------------------------------------------------+
-No seat details available for seat type: AC_S
+3. **Output Details:**
+   - **Train Details**: Displays train name, departure, and arrival times for the selected route.
+   - **Seat Availability**: Categorized by seat type, with seats grouped by prefixes for better organization.
+    - **Color-Coded Table**: Indicates available seats and those in the booking process with visual distinctions for easy comprehension.
+
+### Example Output
+   ```
+   TISTA EXPRESS (707) (03 Dec, 07:30 am - 03 Dec, 08:19 am) (Dhaka - Joydebpur)
+   ================================================================================
+    
+   Seat Type: SNIGDHA
+   Available Tickets: 0 ticket | In Booking Process: 2 tickets
+   +-------------------------------------+----------------+
+   | Status                              | Seat Numbers   |
+   +=====================================+================+
+   | In Booking Process (JA) - 2 tickets | JA-4, JA-19    |
+   +-------------------------------------+----------------+
+    
+   Seat Type: S_CHAIR
+   Available Tickets: 19 tickets | In Booking Process: 2 tickets
+   +--------------------------------------+-------------------------------------------------+
+   | Status                               | Seat Numbers                                    |
+   +======================================+=================================================+
+   | Available (THA) - 19 tickets         | THA-4, THA-6, THA-10, THA-12, THA-14, THA-17,   |
+   |                                      | THA-18, THA-20, THA-23, THA-31, THA-32, THA-30, |
+   |                                      | THA-29, THA-34, THA-36, THA-35, THA-39, THA-40, |
+   |                                      | THA-38                                          |
+   +--------------------------------------+-------------------------------------------------+
+   | In Booking Process (NEO) - 2 tickets | NEO-55, NEO-56                                  |
+   +--------------------------------------+-------------------------------------------------+
+   No seat details available for seat type: AC_S
    ```
