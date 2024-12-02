@@ -94,10 +94,14 @@ pip install requests tabulate colorama
    Update the following variables in the `detailsSeatAvailability.py` script:
     
    ```python
-   TOKEN = 'your_token_here'     # Replace with your authorization token
-   from_city = "Dhaka"           # Set the origin city
-   to_city = "Joydebpur"         # Set the destination city
-   date_of_journey = "03-Dec-2024"  # Set the journey date
+   TOKEN = 'your_token_here'                # Replace with your authorization token
+   
+   CONFIG = {
+       'from_city': 'Dhaka',                # Set the origin city
+       'to_city': 'Joydebpur',              # Set the destination city
+       'date_of_journey': '03-Dec-2024',    # Set the date of journey
+       'seat_class': 'S_CHAIR'              # No need to change this
+   }
    ```
 
 2. **Run the Script:**
