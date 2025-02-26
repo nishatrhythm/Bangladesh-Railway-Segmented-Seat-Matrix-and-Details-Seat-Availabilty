@@ -53,7 +53,9 @@
             }
         ],
         "total_duration": "03:35",
-        "train_name": "RUPOSHI BANGLA EXPRESS (827)",
-        "train_model": "827"
+        "train_name": "RUPOSHI BANGLA EXPRESS (827)"
+    },
+    "extra": {
+        "hash": "FE8AB15B345270CFF53BFA245BE670BC"
     }
 }
