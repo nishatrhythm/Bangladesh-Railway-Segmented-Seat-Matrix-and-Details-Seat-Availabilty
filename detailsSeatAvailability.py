@@ -41,13 +41,14 @@ def get_seat_layout(trip_id: str, trip_route_id: str) -> Tuple[Dict, Dict, int, 
         data = response.json()
         seat_layout = data.get("data", {}).get("seatLayout", [])
         
-        seats = [(seat["seat_number"], seat["seat_availability"]) 
+        seats = [(seat["seat_number"], seat["seat_availability"], seat["ticket_type"]) 
                 for layout in seat_layout 
                 for row in layout["layout"] 
                 for seat in row]
         
-        available_seats = [num for num, avail in seats if avail == SEAT_AVAILABILITY['AVAILABLE']]
-        booking_process_seats = [num for num, avail in seats if avail == SEAT_AVAILABILITY['IN_PROCESS']]
+        available_seats = [num for num, avail, _ in seats if avail == SEAT_AVAILABILITY['AVAILABLE']]
+        booking_process_seats = [num for num, avail, ttype in seats 
+                                if avail == SEAT_AVAILABILITY['IN_PROCESS'] and ttype in {1, 2, 3}]
         
         return (group_by_prefix(available_seats),
                 group_by_prefix(booking_process_seats),
