@@ -1,6 +1,4 @@
-import json
-import os
-import requests
+import json, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tabulate import tabulate
 from colorama import init, Fore, Style
@@ -10,22 +8,35 @@ from collections import deque
 # Initialize colorama for colored text output
 init(autoreset=True)
 
-# Directory containing processed JSON files
-processed_dir = 'processed'
-target_train_model = "781"  # This can be set to match the desired train model
+# Target train model and journey date
+target_train_model = "745"  # This can be set to match the desired train model
 
 # Date for the journey in the correct format
 date_of_journey = "15-Nov-2024"  # This can be modified as needed
 
-# Collect train data from the processed folder
-train_data = None
-for file_name in os.listdir(processed_dir):
-    if file_name.endswith('.json'):
-        with open(os.path.join(processed_dir, file_name), 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            if data['data']['train_model'] == target_train_model:
-                train_data = data['data']
-                break
+# Convert date_of_journey to API required format (YYYY-MM-DD)
+date_obj = datetime.strptime(date_of_journey, "%d-%b-%Y")
+api_date_format = date_obj.strftime("%Y-%m-%d")
+
+# Fetch train data from API
+def fetch_train_data(model, departure_date):
+    url = "https://railspaapi.shohoz.com/v1.0/web/train-routes"
+    payload = {
+        "model": model,
+        "departure_date_time": departure_date
+    }
+    headers = {'Content-Type': 'application/json'}
+    
+    response = requests.post(url, json=payload, headers=headers)
+    
+    if response.status_code == 200:
+        return response.json().get('data')
+    else:
+        print(f"{Fore.RED}Failed to fetch train data. Status code: {response.status_code}")
+        return None
+
+# Collect train data
+train_data = fetch_train_data(target_train_model, api_date_format)
 
 if not train_data:
     print(f"{Fore.RED}No matching train data found for model {target_train_model}")
@@ -37,7 +48,6 @@ days = train_data['days']
 train_name = train_data['train_name']
 
 # Check if the date of journey is an off day for the train
-date_obj = datetime.strptime(date_of_journey, "%d-%b-%Y")
 day_of_week = date_obj.strftime("%a")  # Get the abbreviated day name (e.g., "Mon", "Tue")
 
 if day_of_week not in days:
