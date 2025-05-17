@@ -49,6 +49,9 @@ station_dates = {}
 current_date = date_obj
 previous_time = None
 
+MAX_REASONABLE_GAP_HOURS = 12  # Or whatever you decide
+previous_station_name = None
+
 for i, route in enumerate(train_data['routes']):
     station = route['city']
     dep_time_str = route.get('departure_time') or route.get('arrival_time')
@@ -65,16 +68,31 @@ for i, route in enumerate(train_data['routes']):
 
         current_time = timedelta(hours=hour, minutes=minute)
 
-        if previous_time is not None and current_time < previous_time:
-            # Passed midnight, so increment the date
-            current_date += timedelta(days=1)
-
+        if previous_time is not None:
+            time_diff = (current_time - previous_time).total_seconds() / 3600
+            if current_time < previous_time:
+                time_diff = ((current_time + timedelta(days=1)) - previous_time).total_seconds() / 3600
+                if time_diff < MAX_REASONABLE_GAP_HOURS:
+                    current_date += timedelta(days=1)
+                else:
+                    hours = int(time_diff)
+                    minutes = int((time_diff - hours) * 60)
+                    print(f"{Fore.RED}[WARN] Suspiciously large time gap ({hours} h {minutes} min) between {station} and {previous_station_name} in API response. Not incrementing date.")
         previous_time = current_time
-    # Save date for this station
+        previous_station_name = station  # Save for the next iteration
+
     station_dates[station] = current_date.strftime("%Y-%m-%d")
 
-# Check if train spans multiple dates
-from datetime import timedelta
+days = train_data['days']
+train_name = train_data['train_name']
+
+# Check if the date of journey is an off day for the train
+day_of_week_abbr = date_obj.strftime("%a")  # Get the abbreviated day name (e.g., "Mon", "Tue")
+day_of_week_full = date_obj.strftime("%A")  # For display (e.g., "Monday")
+
+if day_of_week_abbr not in days:
+    print(f"{Fore.YELLOW}The train {train_name} does not run on {day_of_week_full}. Please choose another date.")
+    exit()
 
 unique_dates = set(station_dates.values())
 if len(unique_dates) > 1:
@@ -89,16 +107,6 @@ if len(unique_dates) > 1:
     print(f"{Fore.YELLOW}- It continues its journey and reaches some stations after 12 AM, which falls on the next day: {next_day_str}.")
     print(f"{Fore.YELLOW}- That's why availability for some parts of the journey may show under the next day's date: {next_day_str}.")
     print(f"{Fore.YELLOW}- To see ticket options for early morning arrivals on {date_of_journey} (just after 12 AM), search using the previous date: {prev_day_str}.\n")
-
-days = train_data['days']
-train_name = train_data['train_name']
-
-# Check if the date of journey is an off day for the train
-day_of_week = date_obj.strftime("%a")  # Get the abbreviated day name (e.g., "Mon", "Tue")
-
-if day_of_week not in days:
-    print(f"{Fore.YELLOW}The train '{train_name}' (Model: {target_train_model}) does not run on {day_of_week}. Please choose another date.")
-    exit()
 
 print(f"{Fore.GREEN}Train Name: {train_name}")
 print(f"Train Model: {target_train_model}")
