@@ -13,7 +13,8 @@ This repository provides two powerful tools for visualizing and analyzing train 
 - **Real-Time Data Fetching**: Retrieves seat availability for different train routes and seat types.
 - **Seat Matrix Display**: Presents seat matrices for each seat type in a tabular format.
 - **Segmented Route Finder**: Calculates and displays alternative travel paths if a direct route is unavailable.
-- **Detailed Fare Breakdown**: Shows base fare and VAT amounts for direct and segmented routes.
+- **Mixed Seat-Type Fallback**: Automatically finds a mixed seat-type segmented route when no full same-type route is available.
+- **Detailed Fare Breakdown**: Shows base fare, VAT, service charges, and bedding charges (for specific seat types) for direct and segmented routes.
 - **Interactive User Interface**: Menu-driven prompts for ease of use.
 
 ## Sample Run
@@ -55,14 +56,30 @@ Below is an example of the script running in the terminal:
    - Displays seat matrices for each seat type if seats are available.
    - Shows direct routes with a breakdown of base fare and VAT.
    - Finds and displays segmented routes if a direct route is not available.
+   - Displays mixed seat-type segmented routes as fallback when same-type routes are not available.
+   - Clearly highlights segment dates when journey spans multiple days.
   
 ### Example Output for a Route
    ```
-   Finding segmented route for seat type: S_CHAIR
-Segmented route found for seat type S_CHAIR:
- - Dhaka to Joydebpur, Fare (50.00) + VAT (7.50) = 57.50
- - Joydebpur to Mymensingh, Fare (100.00) + VAT (15.00) = 115.00
-Total Fare: 172.50
+Enter the origin station: Dhaka
+Enter the destination station: Cox's Bazar
+
+Finding segmented route for seat type: AC_B
+
+Direct route available for seat type AC_B from Dhaka to Cox's Bazar.
+   Base Fare: 2069 | VAT: 311 | Charge: 20 | Bedding: 50
+
+   Total Fare: 2450
+
+Finding segmented route for seat type: SNIGDHA
+Segmented route found for seat type SNIGDHA:
+ - Dhaka to Chattogram (starts from Dhaka on 18-May-2025)
+   Base Fare: 743 | VAT: 112 | Charge: 20 | Total: 875
+
+ - Chattogram to Cox's Bazar (starts from Chattogram on 19-May-2025)
+   Base Fare: 408 | VAT: 62 | Charge: 20 | Total: 490
+
+   Total Fare: 1365
    ```
 
 ## Detailed Seat Availability
@@ -112,7 +129,7 @@ pip install requests tabulate colorama
 3. **Output Details:**
    - **Train Details**: Displays train name, departure, and arrival times for the selected route.
    - **Seat Availability**: Categorized by seat type, with seats grouped by prefixes for better organization.
-    - **Color-Coded Table**: Indicates available seats and those in the booking process with visual distinctions for easy comprehension.
+   - **Color-Coded Table**: Indicates available seats and those in the booking process with visual distinctions for easy comprehension.
 
 ### Example Output
    ```
