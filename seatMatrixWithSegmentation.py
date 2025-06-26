@@ -8,6 +8,9 @@ from collections import deque
 # Initialize colorama for colored text output
 init(autoreset=True)
 
+# Replace with your authorization token
+token = 'your_token_here'
+
 # Target train model and journey date
 target_train_model = "745"  # This can be set to match the desired train model
 
@@ -139,8 +142,9 @@ def get_seat_availability(from_city, to_city):
         "date_of_journey": segment_date,
         "seat_class": "SHULOV"  # Modify this as needed
     }
+    headers = {"Authorization": f"Bearer {token}"}
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, headers=headers)
 
     if response.status_code == 200:
         response_data = response.json()

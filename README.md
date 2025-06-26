@@ -41,6 +41,7 @@ Below is an example of the script running in the terminal:
    - You need to update the `target_train_model` and `date_of_journey` variables in the `seatMatrixWithSegmentation.py` script to match your desired train model and date.
 
    ```python
+   token = 'your_token_here'  # Replace with your authorization token
    target_train_model = "781"  # This can be set to match the desired train model
    date_of_journey = "15-Nov-2024"  # This can be modified as needed
    ```
